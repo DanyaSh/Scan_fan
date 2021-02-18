@@ -28,11 +28,19 @@ catalog = "/home/danya/.local/bin/chromedriver"
 driver = webdriver.Chrome(executable_path=catalog, chrome_options=chrome_options)
 
 # url = 'https://quotes.toscrape.com/'
-url = 'https://2ip.ru/'
+# url = 'https://2ip.ru/'
+url = 'https://www.pirateproxy-bay.com'
 # url = 'https://www1.thepiratebay3.to/top/all/'
-# url = 'https://www.pirateproxy-bay.com'
 driver.get(url)
-time.sleep(300)
+# time.sleep(300)
+
+
+# text_top100 = driver.find_element_by_name(title="Top 100")
+link_top100 = driver.find_element_by_link_text("Top 100")
+
+print(link_top100)
+# print(link100data)
+
 driver.close()
 
 

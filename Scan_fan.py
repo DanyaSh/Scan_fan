@@ -1,4 +1,4 @@
-    # ********************___02_selenium_03__draft___************************
+    # ********************___02_selenium_04__draft___************************
 '''
 Зайти на сайт pirate через хром инкогнито с vpn и запустить torrent
 Legend:
@@ -10,6 +10,7 @@ Legend:
 🟢  2)  Pirate top 100
 🟢  3)  Go link
 🟢  4)  Run torrent
+🔴  5)  Заменить Readme
 '''
 # import requests
 # from fake_useragent import UserAgent

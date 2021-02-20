@@ -6,11 +6,9 @@ Legend:
 🟡  0)  Не останавливаться на достигнутом
 🔴  0)  Сделать невозможное
 
-🟢  1)  Pirate
-🟢  2)  Pirate top 100
-🟢  3)  Go link
-🟢  4)  Run torrent
-🔴  5)  Заменить Readme
+🟢  1)  Заменить Readme
+🔴  2)  Заменить код windows
+🔴  3)  Отладить код на много раздач
 '''
 # import requests
 # from fake_useragent import UserAgent
@@ -26,12 +24,13 @@ chrome_options = webdriver.ChromeOptions()
 
 # For linux
 chrome_options.add_argument('user-data-dir=/home/danya/.config/google-chrome')
+catalog = "/home/danya/.local/bin/chromedriver"
 
 # For Windows
-# chrome_options.add_argument('user-data-dir=C:\\Users\\Name_Profile\\AppData\\Local\\Google\\Chrome\\User Data')
+# chrome_options.add_argument('user-data-dir=C:\\Users\\Danya\\AppData\\Local\\Google\\Chrome\\User Data')
+# catalog = "C:\\Users\\Danya\\AppData\\Local\\Temp\\chromedriver.exe"
 
 chrome_options.add_argument("--incognito")
-catalog = "/home/danya/.local/bin/chromedriver"
 driver = webdriver.Chrome(executable_path=catalog, chrome_options=chrome_options)
 
 # url = 'https://quotes.toscrape.com/'
@@ -58,6 +57,7 @@ for x in range (1, len_lines+1):
     if indicator!='Porn':
         driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[2]").click()
         driver.find_element_by_xpath("//a[@title='Get this torrent']").click()
+        # driver.find_element_by_link_text("MAGNET").click()
         driver.back()
         # lines.append(line)
         pass
@@ -83,6 +83,7 @@ driver.close()
 
 
 # Мусорка 2
+# time.sleep(1)
 # chrome_options.add_argument('headless')
 
 '''

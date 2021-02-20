@@ -7,8 +7,9 @@ Legend:
 🔴  0)  Сделать невозможное
 
 🟢  1)  Заменить Readme
-🔴  2)  Заменить код windows
-🔴  3)  Отладить код на много раздач
+🟢  2)  Заменить код windows
+🟢  3)  Пропускать ссылки с ошибкой
+🔴  4)  Почему ошибка появляется?
 '''
 # import requests
 # from fake_useragent import UserAgent
@@ -43,8 +44,8 @@ driver.get(url)
 # text_top100 = driver.find_element_by_name(title="Top 100")
 driver.find_element_by_link_text("Top 100").click()
 driver.find_element_by_xpath("//a[@href='/top/48hall']").click()
-# len_lines = 101
-len_lines = 3
+len_lines = 100
+# len_lines = 3
 lines = []
 lines_stop = []
 for x in range (1, len_lines+1):
@@ -55,12 +56,16 @@ for x in range (1, len_lines+1):
     indicator=column1.text[0]+column1.text[1]+column1.text[2]+column1.text[3]
     # print(indicator)
     if indicator!='Porn':
-        driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[2]").click()
-        driver.find_element_by_xpath("//a[@title='Get this torrent']").click()
-        # driver.find_element_by_link_text("MAGNET").click()
-        driver.back()
-        # lines.append(line)
-        pass
+        try:
+            driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[2]").click()
+            driver.find_element_by_xpath("//a[@title='Get this torrent']").click()
+            # driver.find_element_by_link_text("MAGNET").click()
+            driver.back()
+            # lines.append(line)
+        except:
+            driver.get(url)
+            driver.find_element_by_link_text("Top 100").click()
+            driver.find_element_by_xpath("//a[@href='/top/48hall']").click()
     else:
         # lines_stop.append(line)
         pass
@@ -75,9 +80,9 @@ driver.close()
 
 
 
-
-
-
+'''Error get this torrent
+<a style="background-image: url('/static/img/icons/icon-magnet.gif');" href="magnet:?xt=urn:btih:DA51F364517AEF3934664A5E8C869C30A4BC0BE4&amp;dn=Kenan.S01E01.HDTV.x264-PHOENiX%5BTGx%5D&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&amp;tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce" title="Get this torrent" target="_blank">&nbsp;Magnet</a>
+'''
 
 
 

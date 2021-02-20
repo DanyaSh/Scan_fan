@@ -29,11 +29,11 @@ chrome_options = webdriver.ChromeOptions()
 
 # For linux
 chrome_options.add_argument('user-data-dir=/home/'+ config.user_name +'/.config/google-chrome')
-catalog = '/home/'+ config.user_name +'/.local/bin/chromedriver'
+catalog = '/home/'+ config.user_name +'/.local/bin/chromedriver' #Каталог куда скачали webdriver (должен быть в PATH)
 
 # For Windows
 # chrome_options.add_argument('user-data-dir=C:\\Users\\'+ config.user_name +'\\AppData\\Local\\Google\\Chrome\\User Data')
-# catalog = "C:\\Users\\"+ config.user_name +"\\AppData\\Local\\Temp\\chromedriver.exe"
+# catalog = "C:\\Users\\"+ config.user_name +"\\AppData\\Local\\Temp\\chromedriver.exe" #Каталог куда скачали webdriver (должен быть в PATH)
 
 chrome_options.add_argument("--incognito")
 driver = webdriver.Chrome(executable_path=catalog, chrome_options=chrome_options)

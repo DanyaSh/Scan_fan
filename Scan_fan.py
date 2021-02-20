@@ -1,4 +1,4 @@
-    # ********************___02_selenium_04__draft___************************
+# ********************___02_selenium_04__draft___************************
 '''
 Зайти на сайт pirate через хром инкогнито с vpn и запустить torrent
 Legend:
@@ -9,8 +9,11 @@ Legend:
 🟢  1)  Заменить Readme
 🟢  2)  Заменить код windows
 🟢  3)  Пропускать ссылки с ошибкой
-🔴  4)  Почему ошибка появляется?
+🟢  4)  Сделать имя пользователя переменной
+🔴  5)  Почему ошибка появляется?
 '''
+# ***********************************************************************
+
 # import requests
 # from fake_useragent import UserAgent
 # from bs4 import BeautifulSoup
@@ -20,16 +23,17 @@ Legend:
 from selenium import webdriver
 import pandas as pd
 import time
+import config
 
 chrome_options = webdriver.ChromeOptions()
 
 # For linux
-chrome_options.add_argument('user-data-dir=/home/danya/.config/google-chrome')
-catalog = "/home/danya/.local/bin/chromedriver"
+chrome_options.add_argument('user-data-dir=/home/'+ config.user_name +'/.config/google-chrome')
+catalog = '/home/'+ config.user_name +'/.local/bin/chromedriver'
 
 # For Windows
-# chrome_options.add_argument('user-data-dir=C:\\Users\\Danya\\AppData\\Local\\Google\\Chrome\\User Data')
-# catalog = "C:\\Users\\Danya\\AppData\\Local\\Temp\\chromedriver.exe"
+# chrome_options.add_argument('user-data-dir=C:\\Users\\'+ config.user_name +'\\AppData\\Local\\Google\\Chrome\\User Data')
+# catalog = "C:\\Users\\"+ config.user_name +"\\AppData\\Local\\Temp\\chromedriver.exe"
 
 chrome_options.add_argument("--incognito")
 driver = webdriver.Chrome(executable_path=catalog, chrome_options=chrome_options)
@@ -80,12 +84,10 @@ driver.close()
 
 
 
-'''Error get this torrent
+'''Мусорка 3
+# Error get this torrent
 <a style="background-image: url('/static/img/icons/icon-magnet.gif');" href="magnet:?xt=urn:btih:DA51F364517AEF3934664A5E8C869C30A4BC0BE4&amp;dn=Kenan.S01E01.HDTV.x264-PHOENiX%5BTGx%5D&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&amp;tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce" title="Get this torrent" target="_blank">&nbsp;Magnet</a>
 '''
-
-
-
 
 # Мусорка 2
 # time.sleep(1)

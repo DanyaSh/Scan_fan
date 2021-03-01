@@ -24,11 +24,17 @@ https://sites.google.com/a/chromium.org/chromedriver/
 1.1) В коде выбрать свою оs
 
 1.2) Создать в папке программы файл config.py и записать строки (с личными данными):
+
 #Personal data
+
 user_name = 'USER_PC'
+
 login = 'YOUR_LOGIN'
+
 password = 'YOUR_PASSWORD'
+
 maxGB=50    #max value files of torrent for upload
+
 minLS=3     #min division lich/sid for upload
 
 

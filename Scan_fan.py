@@ -17,38 +17,110 @@ https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 # from selenium.webdriver.chrome.options import Options
 # from selenium import webdriver
 # import pandas as pd
-# from fake_useragent import UserAgent
-# UserAgent().chrome
+# from requests import Request, Session
 
 import requests
+import lxml.html
+from lxml import html
 from bs4 import BeautifulSoup
 import time
 import config
+import random
+from fake_useragent import UserAgent
+UserAgent().chrome
 
-free_proxy_site='https://hidemy.name/ru/proxy-list/?ports=443&type=s#list'
+list_proxy=[]
+free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
 
 def find_proxy(url_proxy):
-    response = requests.get(url=url_proxy)
+    response = requests.get(url=url_proxy, headers={'User-Agent': UserAgent().chrome})
     soup = BeautifulSoup(response.text, 'lxml')
-    # proxy = soup.html.body.wrap.services_proxylist.services
-    wrap = soup.html.body.wrap
-    # service=wrap.next_sibling
-    # proxy = service.inner.table_block.table.tr.td
-    print(wrap)
-
-# document.querySelector("body > div.wrap > div.services_proxylist.services > div > div.table_block > table > tbody > tr:nth-child(1) > td:nth-child(1)")
-# <td>116.228.227.211</td>
-# body > div.wrap > div.services_proxylist.services > div > div.table_block > table > tbody > tr:nth-child(1) > td:nth-child(1)
-# /html/body/div[1]/div[4]/div/div[4]/table/tbody/tr[1]/td[1]
-    pass
+    # list_proxy=[]
+    proxy=soup.tbody.find_all('tr')
+    for x in proxy:
+        list_proxy.append(x.td.text)
+    # print(list_proxy)
 
 find_proxy(free_proxy_site)
+# print(list_proxy)
+# proxies = {'https': list_proxy[random.randint(0, (len(list_proxy)-1))]}
+# proxies = {'https': list_proxy[1]}
+proxies = {'https': '116.228.227.211'}
+session = requests.session()
+session.headers = {'User-Agent': UserAgent().chrome}
+
+url = 'https://rutracker.org/forum/login.php'
+login_data = {
+    'login_username':config.login,
+    'login_password':config.password,
+    'login':'%E2%F5%EE%E4'
+}
+r_post=session.post(url=url, proxies=proxies, data=login_data)
+
+url = 'https://rutracker.org/forum/tracker.php?nm=2021'
+search_data = {
+    'f[]':'-1',
+    'pn':'',
+    's':'2',
+    'o':'11',
+    'nm':'2021'
+}
+r_post=session.post(url=url, proxies=proxies, data=search_data)
+soup = BeautifulSoup(r_post.text, 'lxml')
+
+file=open(("test.html"),"w")
+file.write(str(soup))
+file.close()
+
+
 
 '''
-proxies = {'https': '116.228.227.211'}
+https://rutracker.org/forum/tracker.php?nm=2021
+f%5B%5D=-1&o=11&s=2&pn=&nm=2021
+'''
 
+'''
+url = 'https://rutracker.org/forum/tracker.php?nm=2021'
+r_get=session.get(url=url, proxies=proxies)
+soup = BeautifulSoup(r_get.text, 'lxml')
+file=open(("test.html"),"w")
+file.write(str(soup))
+file.close()
+'''
+
+
+# response=requests.post(url=url, files=login_data)
+# '116.228.227.211'
+# '51.68.207.81'
+# r_get=session.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
+
+# login_username=vavancheg&login_password=21091992&login=%E2%F5%EE%E4
+
+
+# url = 'http://rutracker.org/forum/login.php?redirect=tracker.php?nm=2021'
+# user_agent_val = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+# response = requests.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
+# response = requests.get(url=url, proxies=proxies)
+
+# session = requests.Session()
+# response = requests.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
+# print(response.request.headers)
+# r = session.post(form.action, data=form.form_values())
+
+
+# response = session.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
+# r = session.post(form.action, data=form.form_values())
+
+
+'''
+soup = BeautifulSoup(response.text, 'lxml')
+soup.find_all('Вход')
+print(response.status_code)
+'''
+
+
+'''
 # url = 'https://quotes.toscrape.com/'
-# url = 'https://rutracker.org/'
 # url = 'https://2ip.ru/'
 url = 'https://www1.thepiratebay3.to/top/all'
 

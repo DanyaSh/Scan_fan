@@ -19,6 +19,7 @@ https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 # import pandas as pd
 # from requests import Request, Session
 
+import re
 import requests
 import lxml.html
 from lxml import html
@@ -31,7 +32,6 @@ UserAgent().chrome
 
 list_proxy=[]
 free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
-
 def find_proxy(url_proxy):
     response = requests.get(url=url_proxy, headers={'User-Agent': UserAgent().chrome})
     soup = BeautifulSoup(response.text, 'lxml')
@@ -41,6 +41,7 @@ def find_proxy(url_proxy):
         list_proxy.append(x.td.text)
     # print(list_proxy)
 
+print('Получаем прокси')
 find_proxy(free_proxy_site)
 # print(list_proxy)
 # proxies = {'https': list_proxy[random.randint(0, (len(list_proxy)-1))]}
@@ -55,30 +56,175 @@ login_data = {
     'login_password':config.password,
     'login':'%E2%F5%EE%E4'
 }
+print('Авторизуемся')
 r_post=session.post(url=url, proxies=proxies, data=login_data)
 
-url = 'https://rutracker.org/forum/tracker.php?nm=2021'
+url = 'https://rutracker.org/forum/tracker.php?f=1105'
 search_data = {
-    'f[]':'-1',
-    'pn':'',
-    's':'2',
+    'f[]':'1105',
     'o':'11',
-    'nm':'2021'
+    's':'2',
+    'tm':'-1',
+    # 'new':'1', #only new after last request
+    'pn':'',
+    'nm':''
 }
+print('Запрос торрентов')
 r_post=session.post(url=url, proxies=proxies, data=search_data)
 soup = BeautifulSoup(r_post.text, 'lxml')
+list_lines=soup.tbody.find_all('tr')
+dict_pretty={}
+i=0
+while i<=9:
+    for line in list_lines:
+        pretty=False
+        try:
+            col_value=line.find(class_='row4 small nowrap tor-size').a.text
+            value=float(col_value[0:-5])
+            dim_value=col_value[-4]
+            sid=float(line.find(class_='row4 nowrap').b.text)
+            leech=float(line.find(class_='row4 leechmed bold').text)
+        except:
+            break
+        if sid>0 and leech>0 and leech/sid>config.minLS:
+                if dim_value=="M":
+                    pretty = True
+                elif dim_value=="G" and value<config.maxGB:
+                    pretty = True
+                else:
+                    pretty = False
+        if pretty==True:
+            link='https://rutracker.org/forum/'+line.find(class_='row4 med tLeft t-title-col').find(class_='wbr t-title').a.attrs['href']
+            dict_pretty[link]={
+                'link':link,
+                'sid':sid,
+                'leech':leech,
+                'LS':leech/sid,
+                'value':value,
+                'col_value':col_value,
+                'dim_value':dim_value
+            }
+        n=float(list_lines.index(line))
+        print('Генерируем список_'+str((n/5)+i*10)+'%\r', end='')
+    i+=1
+print('Генерируем список_100%  ')
 
+#_______________________________________Create priority list______________________________________
+list_pretty=[]
+dict_pretty_sort={}
+
+for key, value in dict_pretty.items():
+    # dict_pretty_sort[link]=(dict_pretty[link])['link']
+    dict_pretty_sort[key]=value['LS']
+
+list_sort_val = sorted(dict_pretty_sort.values()) # Sort the values
+list_sort_key = []
+
+for i in list_sort_val:
+    for k in dict_pretty_sort.keys():
+        if dict_pretty_sort[k] == i:
+            list_sort_key.append(k)
+#_______________________________________Create upload list______________________________________
+
+list_upload=[]
+now_value=0.00
+for link in list_sort_key:
+    #variabels
+    atr_empt=False
+    atr_value=False
+    atr_len=False
+    len_torrents=list_sort_key.index(link)
+    if (dict_pretty[link])['dim_value']=='G':
+        new_value=now_value+(dict_pretty[link])['value']
+    else:
+        new_value=now_value+((dict_pretty[link])['value']/1024)
+
+    #new variabels
+    if list_sort_key.index(link)==0:
+        atr_empt=True
+    else:
+        if new_value < config.maxGB:
+            atr_value=True
+        else:
+            atr_value=False
+        if len_torrents < config.max_len_tor:
+            atr_len=True
+        else:
+            atr_len=False
+
+    #update list_upload
+    if atr_empt==True or (atr_value==True and atr_len==True):
+        now_value+=new_value
+        list_upload.append(link)
+
+print('ready')
+'''
+print(list_sort_key[0:20])
+print('ready')
+for i in sorted_values:
+    for k in dict_pretty_sort.keys():
+        if dict_pretty_sort[k] == i:
+            dict_pretty_sorted[k] = dict_pretty_sort[k]
+            break
+'''
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''Мусорка 5
+    try:
+            col_value = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[6]/a")
+            col_sid = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[7]/b")
+            col_lich = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[8]")
+        except:
+            break
+
+        sid=float(col_sid.text)
+        lich=float(col_lich.text)
+        dim_value=col_value.text[-4]
+        value=float(col_value.text[0:-5])
+
+        if sid>0 and lich>0 and lich/sid>config.minLS:
+            if dim_value=="M":
+                pretty = True
+            elif dim_value=="G" and value<config.maxGB:
+                pretty = True
+            else:
+                pretty = False
+'''
+'''
+list_linesP=[]
+for tag in soup.find_all(re.compile("tCenter hl-tr"), 'tr'):
+    list_linesP.append(tag)
+'''
+# print(list_lines)
+# print(list_linesP)
+# <tr id="trs-tr-5624667" class="tCenter hl-tr" role="row">
+'''
 file=open(("test.html"),"w")
 file.write(str(soup))
 file.close()
-
-
-
+'''
 '''
 https://rutracker.org/forum/tracker.php?nm=2021
 f%5B%5D=-1&o=11&s=2&pn=&nm=2021
 '''
-
 '''
 url = 'https://rutracker.org/forum/tracker.php?nm=2021'
 r_get=session.get(url=url, proxies=proxies)
@@ -87,67 +233,39 @@ file=open(("test.html"),"w")
 file.write(str(soup))
 file.close()
 '''
-
-
 # response=requests.post(url=url, files=login_data)
 # '116.228.227.211'
 # '51.68.207.81'
 # r_get=session.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
-
 # login_username=vavancheg&login_password=21091992&login=%E2%F5%EE%E4
-
-
 # url = 'http://rutracker.org/forum/login.php?redirect=tracker.php?nm=2021'
 # user_agent_val = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
 # response = requests.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
 # response = requests.get(url=url, proxies=proxies)
-
 # session = requests.Session()
 # response = requests.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
 # print(response.request.headers)
 # r = session.post(form.action, data=form.form_values())
-
-
 # response = session.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
 # r = session.post(form.action, data=form.form_values())
-
-
 '''
 soup = BeautifulSoup(response.text, 'lxml')
 soup.find_all('Вход')
 print(response.status_code)
 '''
-
-
 '''
 # url = 'https://quotes.toscrape.com/'
 # url = 'https://2ip.ru/'
 url = 'https://www1.thepiratebay3.to/top/all'
-
 # response = requests.get(url=url, proxies=proxies, headers={'User-Agent': UserAgent().chrome})
 # response = requests.get(url=url, proxies=dict(http='socks5://user:pass@host:port', https='socks5://user:pass@host:port'))
 # response = requests.get(url)
 response = requests.get(url=url, proxies=proxies)
-
 soup = BeautifulSoup(response.text, 'lxml')
-
 file=open(("test.html"),"w")
 file.write(str(soup))
 file.close()
 '''
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 '''Мусорка 4
 chrome_options = webdriver.ChromeOptions()

@@ -20,6 +20,7 @@ https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 # from requests import Request, Session
 
 import re
+import os
 import requests
 import lxml.html
 from lxml import html
@@ -33,6 +34,10 @@ UserAgent().chrome
 list_proxy=[]
 free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
 def find_proxy(url_proxy):
+    '''
+    proxy='alogin:parol@10.1.1.1:3128' #данные прокси; логин, пароль и айпи адрес с портом
+    proxy = {'http': 'http://' + proxy, 'https': 'https://' + proxy} #делаем прокси доступным в http, https
+    '''
     response = requests.get(url=url_proxy, headers={'User-Agent': UserAgent().chrome})
     soup = BeautifulSoup(response.text, 'lxml')
     # list_proxy=[]
@@ -93,6 +98,9 @@ while i<=9:
                     pretty = True
                 else:
                     pretty = False
+        else:
+            link='https://rutracker.org/forum/'+line.find(class_='row4 med tLeft t-title-col').find(class_='wbr t-title').a.attrs['href']
+            pretty = False
         if pretty==True:
             link='https://rutracker.org/forum/'+line.find(class_='row4 med tLeft t-title-col').find(class_='wbr t-title').a.attrs['href']
             dict_pretty[link]={
@@ -106,6 +114,14 @@ while i<=9:
             }
         n=float(list_lines.index(line))
         print('Генерируем список_'+str((n/5)+i*10)+'%\r', end='')
+    
+    url_list=soup.find(class_='small bold').find_all('a')
+    url='https://rutracker.org/forum/'+str(url_list[-1].attrs['href'])
+    r_get=session.get(url=url, proxies=proxies)
+    soup = BeautifulSoup(r_get.text, 'lxml')
+    list_lines=soup.tbody.find_all('tr')
+    # print('запрос на новую страницу')
+
     i+=1
 print('Генерируем список_100%  ')
 
@@ -117,16 +133,24 @@ for key, value in dict_pretty.items():
     # dict_pretty_sort[link]=(dict_pretty[link])['link']
     dict_pretty_sort[key]=value['LS']
 
+dict_pretty_sort2=dict_pretty_sort
 list_sort_val = sorted(dict_pretty_sort.values()) # Sort the values
 list_sort_key = []
 
-for i in list_sort_val:
+for val in list_sort_val:
     for k in dict_pretty_sort.keys():
-        if dict_pretty_sort[k] == i:
-            list_sort_key.append(k)
+        try:
+            if dict_pretty_sort2[k] == val:
+                list_sort_key.append(k)
+                del dict_pretty_sort2[k]
+                break
+        except KeyError:
+            pass
+
 #_______________________________________Create upload list______________________________________
 
 list_upload=[]
+list_value=[]
 now_value=0.00
 for link in list_sort_key:
     #variabels
@@ -134,16 +158,18 @@ for link in list_sort_key:
     atr_value=False
     atr_len=False
     len_torrents=list_sort_key.index(link)
-    if (dict_pretty[link])['dim_value']=='G':
-        new_value=now_value+(dict_pretty[link])['value']
+    dim_value=(dict_pretty[link])['dim_value']
+    if dim_value=='G':
+        nvalue=(dict_pretty[link])['value']
     else:
-        new_value=now_value+((dict_pretty[link])['value']/1024)
+        nvalue=((dict_pretty[link])['value']/1024)
+    new_value=now_value+nvalue
 
     #new variabels
     if list_sort_key.index(link)==0:
         atr_empt=True
     else:
-        if new_value < config.maxGB:
+        if new_value < config.your_maxGB:
             atr_value=True
         else:
             atr_value=False
@@ -154,10 +180,74 @@ for link in list_sort_key:
 
     #update list_upload
     if atr_empt==True or (atr_value==True and atr_len==True):
-        now_value+=new_value
+        now_value=new_value
         list_upload.append(link)
+        list_value.append(nvalue)
+    else:
+        error=link
+# print('ready')
 
-print('ready')
+for link in list_upload:
+    if os.path.exists('torrents')==False:
+        os.mkdir('torrents')
+    elif os.path.isdir('torrents')==False:
+        os.mkdir('torrents')
+    
+    # change link page to link file
+    url=link.replace('viewtopic', 'dl')
+    f=open('torrents/'+ str(list_sort_key.index(link)) +'.torrent', 'wb')
+    tor = session.get(url, proxies=proxies)
+    f.write(tor.content)
+    f.close()
+    print('Проанализированно файлов_'+str(list_sort_key.index(link))+'\r', end='')
+print('End_program                                            ')
+print(list_value)
+print(sum(list_value))
+
+
+
+
+'''
+        if os.path.exists('torrents')==False:
+            os.mkdir('torrents')
+        elif os.path.isdir('torrents')==False:
+            os.mkdir('torrents')
+        
+        # change link page to link file
+        url=link.replace('viewtopic', 'dl')
+
+        f=open('torrents/'+ str(list_sort_key.index(link)) +'.torrent', 'wb')
+        tor = session.get(url, proxies=proxies)
+        f.write(tor.content)
+        f.close()
+        print('Проанализированно файлов_'+str(list_sort_key.index(link))+'\r', end='')
+print('End_program                                            ')
+'''
+
+'''
+f=open(r'D:\file_bdseo.zip',"wb") #открываем файл для записи, в режиме wb
+# ufr = requests.get("http://site.ru/file.zip") #делаем запрос
+bb3 = requests.get(url, proxies=proxy) #делаем запрос уже с прокси
+f.write(ufr.content) #записываем содержимое в файл; как видите - content запроса
+f.close()
+
+'''
+
+'''
+https://rutracker.org/forum/viewtopic.php?t=4476451 #page link
+https://rutracker.org/forum/dl.php?t=4476451        #file link
+
+form_token=7b28820ea2a3002461300553559d0852
+https://rutracker.org/forum/dl.php?t=4476451
+'''
+
+
+
+
+
+
+
+
 '''
 print(list_sort_key[0:20])
 print('ready')

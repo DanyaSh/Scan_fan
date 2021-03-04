@@ -1,5 +1,6 @@
 /.vscode
+/__pycache__
+/torrents
 config.py
 test.html
-/__pycache__
 test_proxy.html

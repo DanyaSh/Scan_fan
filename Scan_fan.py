@@ -107,7 +107,7 @@ login_data = {
 print('Authorization')
 r_post=session.post(url=url, proxies=proxies, data=login_data)
 
-url = 'https://rutracker.org/forum/tracker.php?f=1105'
+url = 'https://rutracker.org/forum/tracker.php?f='+config.selection
 search_data = {
     'f[]':config.selection,
     'o':'11',

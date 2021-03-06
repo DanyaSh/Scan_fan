@@ -19,7 +19,7 @@ pip3 install fake_useragent
 
 1 Editing the code for yourself
 -------------------------------------------------------------------------------------------------------
-1.2) Rename file  your_config.py в config.py and fill in the lines (with personal data and preferences):
+1.2) Rename file  your_config.py to config.py and fill in the lines (with personal data and preferences):
 
 selection='1105'        # 1105 for Аниме (HD Video) - you can see the last digits in the link (rutracker.org/forum/tracker.php?f=1105)
 

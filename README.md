@@ -1,49 +1,39 @@
 # Scan_fan😎
 -------------------------------------------------------------------------------------------------------
-Бот выгружает самые популярные торренты анализируя топ 500  с сайта Rutracker за 2021 год (на основе Ваших установок - размер файлов торрента + соотношение личей к сидам) 
+Bot uploads torrents to working directory from rutracker.org based on preference in config.py file
 -------------------------------------------------------------------------------------------------------
 
 
-0 Предворительные дела
+0 Preliminary deeds 
 -------------------------------------------------------------------------------------------------------
-0.1) Скачать webdriver для chrome 
-https://sites.google.com/a/chromium.org/chromedriver/
-(Должен располагаться в PATH каталоге)
+0.1) Install Python3  (https://www.python.org/)
 
-0.2) Установить Python3 
+0.2) Install libraries, input (one by one) to cmd or terminal:
 
-0.3) Установить Selenium pandas
-Команда в консоли "pip3 install selenium pandas"
+pip3 install requests
 
-0.4) Желательно чтоб в Вашем chrome уже было расширение vpn.
-Скорее всего в режиме webdrive оно работать не будет, решается при первом запуске.
+pip3 install bs4
+
+pip3 install fake_useragent
 
 
-1 Правка кода под себя
+1 Editing the code for yourself
 -------------------------------------------------------------------------------------------------------
-1.1) В коде выбрать свою оs
+1.2) Rename file  your_config.py в config.py and fill in the lines (with personal data and preferences):
 
-1.2) Создать в папке программы файл config.py и записать строки (с личными данными):
+selection='1105'        # 1105 for Аниме (HD Video) - you can see the last digits in the link (rutracker.org/forum/tracker.php?f=1105)
 
-#Personal data
+maxGB=20                #max value of files for upload
 
-user_name = 'USER_PC'
+minLS=1                 #min division leech/sid for upload (for example 1)
 
-login = 'YOUR_LOGIN'
+your_maxGB=500          #your value for work (for example 500)
 
-password = 'YOUR_PASSWORD'
-
-maxGB=50    #max value files of torrent for upload
-
-minLS=3     #min division lich/sid for upload
+max_len_tor=200         #how much torrents you will can process (for example 200)
 
 
-2 Настройте свой хром и торрент
+2 Set up a torrent client 
 -------------------------------------------------------------------------------------------------------
-2.1) При первом запуске быстренько создать новую вкладку и добавить нужное vpn расширение для chrome
+2.1) In the torrent client, select the folder for autoloading torrents from the folder
 
-2.2) Выставить галку - Всегда открывать этим приложением
-
-2.3) В торрент клиенте выберете папку для загрузки файлов + отключите диалоговый запрос при добавлении торрента
-
--------------------------------------------------------------------------------------------------------
+2.2) In the torrent client, select a folder for downloading files + disable the dialog prompt when adding a torrent

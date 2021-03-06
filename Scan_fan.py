@@ -1,66 +1,173 @@
-# ********************___04_SelRu_00__first___************************
-#MAIN
-from selenium import webdriver
-from selenium.webdriver.support.ui import Select
-import pandas as pd
+    # ********************___03_Proxy___************************
+'''MAIN
+Bot uploads torrents to working directory from rutracker.org based on preference in config.py file
+'''
+from requests.exceptions import ConnectionError
+from requests.packages.urllib3.exceptions import MaxRetryError
+from requests.packages.urllib3.exceptions import ProxyError as urllib3_ProxyError
+import os
+import requests
+from bs4 import BeautifulSoup
 import time
 import config
+import random
+from fake_useragent import UserAgent
 
-chrome_options = webdriver.ChromeOptions()
-
-# For linux
-chrome_options.add_argument('user-data-dir=/home/'+ config.user_name +'/.config/google-chrome')
-catalog = '/home/'+ config.user_name +'/.local/bin/chromedriver' #Каталог куда скачали webdriver (должен быть в PATH)
-
-# For Windows
-# chrome_options.add_argument('user-data-dir=C:\\Users\\'+ config.user_name +'\\AppData\\Local\\Google\\Chrome\\User Data')
-# catalog = "C:\\Users\\"+ config.user_name +"\\AppData\\Local\\Temp\\chromedriver.exe" #Каталог куда скачали webdriver (должен быть в PATH)
-
-chrome_options.add_argument("--incognito")
-chrome_options.add_argument
-driver = webdriver.Chrome(executable_path=catalog, chrome_options=chrome_options)
-url = 'https://rutracker.org'
-driver.get(url)
-driver.find_element_by_link_text("Вход").click()
-driver.find_element_by_name(name="login_username").send_keys(config.login)
-driver.find_element_by_name(name="login_password").send_keys(config.password)
-driver.find_element_by_name(name="login").click()
-driver.find_element_by_id(id_="search-text").send_keys(2021)
-driver.find_element_by_id(id_="search-submit").click()
-select=Select(driver.find_element_by_name(name="o")) #sort by lich
-select.select_by_value("11")
-driver.find_element_by_id(id_="tr-submit-btn").click()
-len_pages = 10
-len_lines = 50
-i=1
-while i<=10:
-    for x in range (1, len_lines+1):
+UserAgent().chrome
+good_proxy=''
+list_proxy=[]
+free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
+def find_proxy(url_proxy):
+    response = requests.get(url=url_proxy, headers={'User-Agent': UserAgent().chrome})
+    soup = BeautifulSoup(response.text, 'lxml')
+    proxy=soup.tbody.find_all('tr')
+    for x in proxy:
+        list_proxy.append(x.td.text)
+    session_test = requests.session()
+    session_test.headers = {'User-Agent': UserAgent().chrome}
+    url = 'https://rutracker.org/forum/login.php'
+    login_data = {
+        'login_username':config.login,
+        'login_password':config.password,
+        'login':'%E2%F5%EE%E4'
+    }
+    for proxy in list_proxy:
+        proxies = {'https': proxy}
+        try:
+            r_post=session_test.post(url=url, proxies=proxies, data=login_data)
+            print('check_proxy_ok')
+        except ConnectionError as ce:
+            if (isinstance(ce.args[0], MaxRetryError) and isinstance(ce.args[0].reason, urllib3_ProxyError)):
+                print('bad_proxy:_'+str(list_proxy.index(proxy)))
+                list_proxy.remove(proxy)
+                pass
+print('Get_proxy')
+find_proxy(free_proxy_site)
+proxies = {'https': list_proxy[random.randint(0, (len(list_proxy)-1))]}
+session = requests.session()
+session.headers = {'User-Agent': UserAgent().chrome}
+url = 'https://rutracker.org/forum/login.php'
+login_data = {
+    'login_username':config.login,
+    'login_password':config.password,
+    'login':'%E2%F5%EE%E4'
+}
+print('Authorization')
+r_post=session.post(url=url, proxies=proxies, data=login_data)
+url = 'https://rutracker.org/forum/tracker.php?f='+config.selection
+search_data = {
+    'f[]':config.selection,
+    'o':'11',
+    's':'2',
+    'tm':'-1',
+    # 'new':'1', #only new after last request
+    'pn':'',
+    'nm':''
+}
+print('Get_torrents')
+r_post=session.post(url=url, proxies=proxies, data=search_data)
+soup = BeautifulSoup(r_post.text, 'lxml')
+list_lines=soup.tbody.find_all('tr')
+dict_pretty={}
+i=0
+while i<=9:
+    for line in list_lines:
         pretty=False
         try:
-            col_value = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[6]/a")
-            col_sid = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[7]/b")
-            col_lich = driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[8]")
+            col_value=line.find(class_='row4 small nowrap tor-size').a.text
+            value=float(col_value[0:-5])
+            dim_value=col_value[-4]
+            sid=float(line.find(class_='row4 nowrap').b.text)
+            leech=float(line.find(class_='row4 leechmed bold').text)
         except:
             break
-        sid=float(col_sid.text)
-        lich=float(col_lich.text)
-        dim_value=col_value.text[-4]
-        value=float(col_value.text[0:-5])
-        if sid>0 and lich>0 and lich/sid>config.minLS:
-            if dim_value=="M":
-                pretty = True
-            elif dim_value=="G" and value<config.maxGB:
-                pretty = True
-            else:
-                pretty = False
+        if sid>0 and leech>0 and leech/sid>config.minLS:
+                if dim_value=="M":
+                    pretty = True
+                elif dim_value=="G" and value<config.maxGB:
+                    pretty = True
+                else:
+                    pretty = False
+        else:
+            link='https://rutracker.org/forum/'+line.find(class_='row4 med tLeft t-title-col').find(class_='wbr t-title').a.attrs['href']
+            pretty = False
         if pretty==True:
-            driver.find_element_by_xpath("//tbody/tr["+str(x)+"]/td[4]/div/a").click()
-            driver.find_element_by_link_text("Скачать по magnet-ссылке").click()
-            driver.find_element_by_id(id_="thx-btn").click()                            #To say thanks
-            driver.back()
-        print(x)
-    if i!=10:
-        driver.find_element_by_link_text("След.").click()
-    print("***Page_"+str(i)+"_close")
+            link='https://rutracker.org/forum/'+line.find(class_='row4 med tLeft t-title-col').find(class_='wbr t-title').a.attrs['href']
+            dict_pretty[link]={
+                'link':link,
+                'sid':sid,
+                'leech':leech,
+                'LS':leech/sid,
+                'value':value,
+                'col_value':col_value,
+                'dim_value':dim_value
+            }
+        n=float(list_lines.index(line))
+        print('Generating a list _'+str((n/5)+i*10)+'%\r', end='')
+    url_list=soup.find(class_='small bold').find_all('a')
+    url='https://rutracker.org/forum/'+str(url_list[-1].attrs['href'])
+    r_get=session.get(url=url, proxies=proxies)
+    soup = BeautifulSoup(r_get.text, 'lxml')
+    list_lines=soup.tbody.find_all('tr')
     i+=1
-driver.close()
+print('Generating a list _100%  ')
+list_pretty=[]
+dict_pretty_sort={}
+for key, value in dict_pretty.items():
+    dict_pretty_sort[key]=value['LS']
+dict_pretty_sort2=dict_pretty_sort
+list_sort_val = sorted(dict_pretty_sort.values(), reverse=True) # Sort the values
+list_sort_key = []
+for val in list_sort_val:
+    for k in dict_pretty_sort.keys():
+        try:
+            if dict_pretty_sort2[k] == val:
+                list_sort_key.append(k)
+                del dict_pretty_sort2[k]
+                break
+        except KeyError:
+            pass
+list_upload=[]
+list_value=[]
+now_value=0.00
+for link in list_sort_key:
+    atr_empt=False
+    atr_value=False
+    atr_len=False
+    len_torrents=list_sort_key.index(link)
+    dim_value=(dict_pretty[link])['dim_value']
+    if dim_value=='G':
+        nvalue=(dict_pretty[link])['value']
+    else:
+        nvalue=((dict_pretty[link])['value']/1024)
+    new_value=now_value+nvalue
+    if list_sort_key.index(link)==0:
+        atr_empt=True
+    else:
+        if new_value < config.your_maxGB:
+            atr_value=True
+        else:
+            atr_value=False
+        if len_torrents < config.max_len_tor:
+            atr_len=True
+        else:
+            atr_len=False
+    if atr_empt==True or (atr_value==True and atr_len==True):
+        now_value=new_value
+        list_upload.append(link)
+        list_value.append(nvalue)
+    else:
+        error=link
+for link in list_upload:
+    if os.path.exists('torrents')==False:
+        os.mkdir('torrents')
+    elif os.path.isdir('torrents')==False:
+        os.mkdir('torrents')
+    url=link.replace('viewtopic', 'dl')
+    f=open('torrents/'+ str(list_sort_key.index(link)) +'.torrent', 'wb')
+    tor = session.get(url, proxies=proxies)
+    f.write(tor.content)
+    f.close()
+    print('Analyzed files_'+str(list_sort_key.index(link))+'\r', end='')
+print("Redy_to_have_"+str(sum(list_value))+"_GB                               ")
+print('End_program')

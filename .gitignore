@@ -1,8 +1,4 @@
 /.vscode
 config.py
-chromedriver
 test.html
-geckodriver
-quoted.csv
-geckodriver.log
 /__pycache__

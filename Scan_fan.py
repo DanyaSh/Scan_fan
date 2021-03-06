@@ -1,5 +1,5 @@
     # ********************___03_Proxy___************************
-'''READY
+'''MASTER
 Bot uploads torrents to working directory from rutracker.org based on preference in config.py file
 '''
 from requests.exceptions import ConnectionError

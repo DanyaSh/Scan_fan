@@ -6,10 +6,8 @@ Legend:
 🔴  0)  Сделать невозможное
 
 🔴  1)  Заменить Readme
-🔴  2)  Заменить код windows
-🔴  3)  Пропускать ссылки с ошибкой
-🔴  4)  Сделать имя пользователя переменной
-🔴  5)  Почему ошибка появляется?
+🟢  2)  Заменить proxy
+🟢  3)  Сделать раздел переменной
 port proxy 443
 https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 '''
@@ -19,39 +17,70 @@ https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 # import pandas as pd
 # from requests import Request, Session
 
-import re
+# import re
 import os
 import requests
-import lxml.html
-from lxml import html
+# import lxml.html
+# from lxml import html
 from bs4 import BeautifulSoup
 import time
 import config
 import random
 from fake_useragent import UserAgent
 UserAgent().chrome
-
+good_proxy=''
 list_proxy=[]
 free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
+# free_proxy_site='https://www.proxydocker.com/ru/proxylist/search?need=BOT&type=http-https&anonymity=all&port='+str(config.port)+'&country=&city=&state=all'
+# free_proxy_site='https://spys.one/proxy-port/'+str(config.port)+'/'
 def find_proxy(url_proxy):
     '''
-    proxy='alogin:parol@10.1.1.1:3128' #данные прокси; логин, пароль и айпи адрес с портом
-    proxy = {'http': 'http://' + proxy, 'https': 'https://' + proxy} #делаем прокси доступным в http, https
+        proxy='alogin:parol@10.1.1.1:3128' #данные прокси; логин, пароль и айпи адрес с портом
+        proxy = {'http': 'http://' + proxy, 'https': 'https://' + proxy} #делаем прокси доступным в http, https
     '''
     response = requests.get(url=url_proxy, headers={'User-Agent': UserAgent().chrome})
     soup = BeautifulSoup(response.text, 'lxml')
-    # list_proxy=[]
+    
+    #hidemy.name.com
     proxy=soup.tbody.find_all('tr')
     for x in proxy:
         list_proxy.append(x.td.text)
-    # print(list_proxy)
+    
+    '''#proxydocker.com/
+        table_proxy=soup.html.body.find('table', cellspacing='0').find_all('tr')[3].td.table
+        proxy_lines=table_proxy.find_all('tr', onmouseover="this.style.background='#002424'")
+        for tr in proxy_lines:
+            line_proxy=tr.td.font.text
+            list_proxy.append(line_proxy[0:-4])
+    '''
 
-print('Получаем прокси')
+    session_test = requests.session()
+    session_test.headers = {'User-Agent': UserAgent().chrome}
+    url = 'https://rutracker.org/forum/login.php'
+    login_data = {
+        'login_username':config.login,
+        'login_password':config.password,
+        'login':'%E2%F5%EE%E4'
+    }
+
+    for proxy in list_proxy:
+        proxies = {'https': proxy}
+        try:
+            print('requests_proxy')
+            r_post=session.post(url=url, proxies=proxies, data=login_data)
+            print('check_proxy_ok')
+        except:
+            print('bad_proxy:_'+str(list_proxy.index(proxy)))
+            list_proxy.remove(proxy)
+            pass
+
+print('Get_proxy')
 find_proxy(free_proxy_site)
-# print(list_proxy)
-# proxies = {'https': list_proxy[random.randint(0, (len(list_proxy)-1))]}
-# proxies = {'https': list_proxy[1]}
-proxies = {'https': '116.228.227.211'}
+proxies = {'https': list_proxy[random.randint(0, (len(list_proxy)-1))]}
+# proxies = {'https': list_proxy[0]}
+# proxies = {'https': good_proxy}
+
+# proxies = {'https': '116.228.227.211'}
 session = requests.session()
 session.headers = {'User-Agent': UserAgent().chrome}
 
@@ -61,12 +90,12 @@ login_data = {
     'login_password':config.password,
     'login':'%E2%F5%EE%E4'
 }
-print('Авторизуемся')
+print('Authorization')
 r_post=session.post(url=url, proxies=proxies, data=login_data)
 
 url = 'https://rutracker.org/forum/tracker.php?f=1105'
 search_data = {
-    'f[]':'1105',
+    'f[]':config.selection,
     'o':'11',
     's':'2',
     'tm':'-1',
@@ -74,7 +103,7 @@ search_data = {
     'pn':'',
     'nm':''
 }
-print('Запрос торрентов')
+print('Get_torrents')
 r_post=session.post(url=url, proxies=proxies, data=search_data)
 soup = BeautifulSoup(r_post.text, 'lxml')
 list_lines=soup.tbody.find_all('tr')
@@ -113,17 +142,16 @@ while i<=9:
                 'dim_value':dim_value
             }
         n=float(list_lines.index(line))
-        print('Генерируем список_'+str((n/5)+i*10)+'%\r', end='')
+        print('Generating a list _'+str((n/5)+i*10)+'%\r', end='')
     
     url_list=soup.find(class_='small bold').find_all('a')
     url='https://rutracker.org/forum/'+str(url_list[-1].attrs['href'])
     r_get=session.get(url=url, proxies=proxies)
     soup = BeautifulSoup(r_get.text, 'lxml')
     list_lines=soup.tbody.find_all('tr')
-    # print('запрос на новую страницу')
 
     i+=1
-print('Генерируем список_100%  ')
+print('Generating a list _100%  ')
 
 #_______________________________________Create priority list______________________________________
 list_pretty=[]
@@ -134,7 +162,7 @@ for key, value in dict_pretty.items():
     dict_pretty_sort[key]=value['LS']
 
 dict_pretty_sort2=dict_pretty_sort
-list_sort_val = sorted(dict_pretty_sort.values()) # Sort the values
+list_sort_val = sorted(dict_pretty_sort.values(), reverse=True) # Sort the values
 list_sort_key = []
 
 for val in list_sort_val:
@@ -199,10 +227,10 @@ for link in list_upload:
     tor = session.get(url, proxies=proxies)
     f.write(tor.content)
     f.close()
-    print('Проанализированно файлов_'+str(list_sort_key.index(link))+'\r', end='')
-print('End_program                                            ')
-print(list_value)
-print(sum(list_value))
+    print('Analyzed files_'+str(list_sort_key.index(link))+'\r', end='')
+print("Redy_to_have_"+str(sum(list_value))+"_GB                               ")
+print('End_program')
+# print(list_value)
 
 
 

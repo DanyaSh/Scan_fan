@@ -6,6 +6,7 @@ login = '0'             #your login on rutracker.org
 password = '0'          #your password on rutracker.org
 
 #config of torrents
+selection='1105'          # 1105 for Аниме (HD Video) https://rutracker.org/forum/tracker.php?f=1105
 maxGB=20                #max value of files for upload (for example 20)
 minLS=1                 #min division leech/sid for upload (for example 1)
 

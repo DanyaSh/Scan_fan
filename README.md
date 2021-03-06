@@ -8,6 +8,14 @@ Bot uploads torrents to working directory from rutracker.org based on preference
 -------------------------------------------------------------------------------------------------------
 0.1) Install Python3  (https://www.python.org/)
 
+0.2) Install libraries, input (one by one) to cmd or terminal:
+
+pip3 install requests
+
+pip3 install bs4
+
+pip3 install fake_useragent
+
 
 1 Editing the code for yourself
 -------------------------------------------------------------------------------------------------------

@@ -16,18 +16,23 @@ https://hidemy.name/ru/proxy-list/?ports=443&type=s#list
 # from selenium import webdriver
 # import pandas as pd
 # from requests import Request, Session
-
 # import re
-import os
-import requests
 # import lxml.html
 # from lxml import html
+
+from requests.exceptions import ConnectionError
+from requests.packages.urllib3.exceptions import MaxRetryError
+from requests.packages.urllib3.exceptions import ProxyError as urllib3_ProxyError
+
+import os
+import requests
 from bs4 import BeautifulSoup
 import time
 import config
 import random
 from fake_useragent import UserAgent
 UserAgent().chrome
+
 good_proxy=''
 list_proxy=[]
 free_proxy_site='https://hidemy.name/ru/proxy-list/?ports='+str(config.port)+'&type=s#list'
@@ -65,14 +70,23 @@ def find_proxy(url_proxy):
 
     for proxy in list_proxy:
         proxies = {'https': proxy}
+        
+        '''
+        print('requests_proxy')
+        r_post=session_test.post(url=url, proxies=proxies, data=login_data)
+        print('check_proxy_ok')
+        '''
+        # '''
         try:
             print('requests_proxy')
-            r_post=session.post(url=url, proxies=proxies, data=login_data)
+            r_post=session_test.post(url=url, proxies=proxies, data=login_data)
             print('check_proxy_ok')
-        except:
-            print('bad_proxy:_'+str(list_proxy.index(proxy)))
-            list_proxy.remove(proxy)
-            pass
+        except ConnectionError as ce:
+            if (isinstance(ce.args[0], MaxRetryError) and isinstance(ce.args[0].reason, urllib3_ProxyError)):
+                print('bad_proxy:_'+str(list_proxy.index(proxy)))
+                list_proxy.remove(proxy)
+                pass
+        # '''
 
 print('Get_proxy')
 find_proxy(free_proxy_site)
@@ -235,7 +249,7 @@ print('End_program')
 
 
 
-'''
+'''Мусорка 6
         if os.path.exists('torrents')==False:
             os.mkdir('torrents')
         elif os.path.isdir('torrents')==False:
@@ -251,7 +265,6 @@ print('End_program')
         print('Проанализированно файлов_'+str(list_sort_key.index(link))+'\r', end='')
 print('End_program                                            ')
 '''
-
 '''
 f=open(r'D:\file_bdseo.zip',"wb") #открываем файл для записи, в режиме wb
 # ufr = requests.get("http://site.ru/file.zip") #делаем запрос
@@ -260,7 +273,6 @@ f.write(ufr.content) #записываем содержимое в файл; к�
 f.close()
 
 '''
-
 '''
 https://rutracker.org/forum/viewtopic.php?t=4476451 #page link
 https://rutracker.org/forum/dl.php?t=4476451        #file link
@@ -268,14 +280,6 @@ https://rutracker.org/forum/dl.php?t=4476451        #file link
 form_token=7b28820ea2a3002461300553559d0852
 https://rutracker.org/forum/dl.php?t=4476451
 '''
-
-
-
-
-
-
-
-
 '''
 print(list_sort_key[0:20])
 print('ready')
@@ -286,24 +290,6 @@ for i in sorted_values:
             break
 '''
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 '''Мусорка 5
     try:
